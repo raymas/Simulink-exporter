@@ -28,11 +28,72 @@
 
 
   <div class="container">
-    <div class="section">
 
-    </div>
+    <div class="icon-block">
+      <h2 class="center light-green-text"><i class="material-icons">looks_one</i></h2>
+      <h5 class="center">Select your target version</h5>
+        <div class="input-field col s12">
+          <select id="target" style="font-color: black;">
+            <option value="Matlab R2006a">Matlab R2006a</option>
+            <option value="Matlab R2006b">Matlab R2006b</option>
+            <option value="Matlab R2007a">Matlab R2007a</option>
+            <option value="Matlab R2007b">Matlab R2007b</option>
+            <option value="Matlab R2008a">Matlab R2008a</option>
+            <option value="Matlab R2008b">Matlab R2008b</option>
+            <option value="Matlab R2009a">Matlab R2009a</option>
+            <option value="Matlab R2009b">Matlab R2009b</option>
+            <option value="Matlab R2010a">Matlab R2010a</option>
+            <option value="Matlab R2010b">Matlab R2010b</option>
+            <option value="Matlab R2011a">Matlab R2011a</option>
+            <option value="Matlab R2011b">Matlab R2011b</option>
+            <option value="Matlab R2012a">Matlab R2012a</option>
+            <option value="Matlab R2012b">Matlab R2012b</option>
+            <option value="Matlab R2013a">Matlab R2013a</option>
+            <option value="Matlab R2013b">Matlab R2013b</option>
+            <option value="Matlab R2014a">Matlab R2014a</option>
+            <option value="Matlab R2014b">Matlab R2014b</option>
+            <option value="Matlab R2015a">Matlab R2015a</option>
+            <option value="Matlab R2015b">Matlab R2015b</option>
+            <option value="Matlab R2016a">Matlab R2016a</option>
+            <option value="Matlab R2016b">Matlab R2016b</option>
+            <option value="Matlab R2017a">Matlab R2017a</option>
+            <option value="Matlab R2017b">Matlab R2017b</option>
+            <option value="Matlab R2018a">Matlab R2018a</option>
+            <option value="Matlab R2018b">Matlab R2018b</option>
+            <option value="Matlab R2019a">Matlab R2019a</option>
+          </select>
+          <label>Targeted version</label>
+      </div>
     <br><br>
+    </div>
+
+    <div class="icon-block">
+      <h2 class="center light-green-text"><i class="material-icons">looks_two</i></h2>
+      <h5 class="center">Upload your file</h5>
+      <div class="container center">
+        <div class="file-field input-field">
+          <div class="btn">
+            <span>Simulink File</span>
+            <input type="file" accept="*.slx,*.mdl" id="fileinput">
+          </div>
+          <div class="file-path-wrapper">
+            <input class="file-path validate" type="text">
+          </div>
+        </div>
+      </div>
+    <br><br>
+    </div>
+
   </div>
+
+
+  <div class="container" id="progressbar" style="visibility: hidden;">
+    <p>Working hard! Please stand by...</p>
+    <div class="progress">
+        <div class="indeterminate" style="background: orange"></div>
+    </div>
+  </div>
+
   <footer>
     <div class="footer-copyright green">
       <div class="container" style="margin: 10px 10px 10px 10px;">

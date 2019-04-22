@@ -1,4 +1,4 @@
-MATLAB_VERSION = {
+var MATLAB_VERSION = {
   "Matlab R2006a" : "7.2",
   "Matlab R2006b" : "7.3",
   "Matlab R2007a" : "7.4",
@@ -28,12 +28,23 @@ MATLAB_VERSION = {
   "Matlab R2019a" : "9.6"
 }
 
+var choice = "Matlab R2018b";
+
 (function($){
   $(function(){
     $('.sidenav').sidenav();
+
+    $('select').formSelect();
+
+    $("#target").on('change', function() {
+      choice = $(this).val();
+    });
+
+    $("#fileinput").on('change', function(evt) {
+    });
+
   });
 })(jQuery);
-
 
 
 function edit_coreProperties(data, version) {
