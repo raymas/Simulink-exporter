@@ -40,12 +40,50 @@ var choice = "Matlab R2018b";
       choice = $(this).val();
     });
 
-    $("#fileinput").on('change', function(evt) {
+    $("#fileinput").on('change', function(event) {
+      readSingleFile(event);
     });
 
   });
 })(jQuery);
 
+class MDL {
+  constructor(name, buffer) {
+    this.name = name;
+    this.buffer = buffer;
+  }
+}
+
+class SLX {
+  constructor(name, buffer) {
+    this.name = name;
+    this.buffer = buffer;
+  }
+}
+
+
+
+function readSingleFile(e) {
+  var file = e.target.files[0];
+  if (!file) {
+    return;
+  }
+  var ext = file.split('.'); ext = ext[ext.length - 1];  
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var contents = e.target.result;
+    if (ext == "mdl") {
+      var mdl = MDL(file, contents);
+    } else if (ext == "slx") {
+      var slx = SLX(file, contents);
+    } else {
+      M.toast({html: 'Serioulsy ? An ' + ext + ' file ?'});
+    }
+  };
+  reader.readAsText(file);
+}
+
+function pushToDownload()
 
 function edit_coreProperties(data, version) {
   xml = $(data);
