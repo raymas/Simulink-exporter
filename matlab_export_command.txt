@@ -1,0 +1,2 @@
+orient('name', 'portrait')
+print -dsvg -sname exported.svg
