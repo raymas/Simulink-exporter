@@ -41,6 +41,9 @@ var choice = "Matlab R2018b";
     });
 
     $("#fileinput").on('change', function(event) {
+      // Loading
+      $('#progressbar').css('visibility', 'visible');
+      //Reading file
       readSingleFile(event);
     });
 
@@ -48,34 +51,81 @@ var choice = "Matlab R2018b";
 })(jQuery);
 
 class MDL {
-  constructor(name, buffer) {
+  constructor(name, buffer, target) {
     this.name = name;
-    this.buffer = buffer;
+    this.buffer = buffer.split("\n");
+    this.target = target;
+    this.changeVersion();
   }
+
+  getName() {
+    return this.name;
+  }
+
+  getBuffer() {
+    return this.buffer.join("\n");
+  }
+
+  changeVersion() {
+    for (var i=0; i < this.buffer.length; i++) {
+      var line = this.buffer[i];
+      if (line.includes("Version")) {
+        // First one is reach, correcting
+        this.buffer[i] = line.replace(new RegExp("[0-9][.][0-9]", "g"), this.target);
+        // only the first one is the one we need
+        break;
+      }
+    }
+  }
+
+  parseInformation() {
+
+  }
+
 }
 
 class SLX {
-  constructor(name, buffer) {
+  constructor(name, buffer, target) {
     this.name = name;
     this.buffer = buffer;
+    this.target = target;
   }
-}
 
+  edit_coreProperties(data, version) {
+    xml = $(data);
+    xml.find("cp:version").text(version.replace("Matlab ", ""));
+  }
+
+  edit_mwcoreProperties(data, version) {
+    xml = $(data);
+    xml.find("matlabRelease").text(version.replace("Matlab ", ""));
+  }
+
+  edit_mwcorePropertiesExtension(data, version) {
+    xml = $(data);
+    xml.find("matlabVersion").text(MATLAB_VERSION[version]);
+  }
+
+}
 
 
 function readSingleFile(e) {
   var file = e.target.files[0];
+  console.log(file);
   if (!file) {
     return;
   }
-  var ext = file.split('.'); ext = ext[ext.length - 1];  
+  var ext = file.name.split('.'); ext = ext[ext.length - 1];
   var reader = new FileReader();
   reader.onload = function(e) {
     var contents = e.target.result;
-    if (ext == "mdl") {
-      var mdl = MDL(file, contents);
-    } else if (ext == "slx") {
-      var slx = SLX(file, contents);
+    console.log(e.target.result);
+    if (ext == "mdl" && contents != "") {
+      var mdl = new MDL(file, contents, MATLAB_VERSION[choice]);
+      pushToDownload(mdl.getBuffer(), new String("[" + choice.split(' ')[1] + "]" + file.name));
+      $('#progressbar').css('visibility', 'hidden');
+    } else if (ext == "slx" && contents != "") {
+      var slx = new SLX(file, contents, MATLAB_VERSION[choice]);
     } else {
       M.toast({html: 'Serioulsy ? An ' + ext + ' file ?'});
     }
@@ -83,19 +133,16 @@ function readSingleFile(e) {
   reader.readAsText(file);
 }
 
-function pushToDownload()
 
-function edit_coreProperties(data, version) {
-  xml = $(data);
-  xml.find("cp:version").text(version.replace("Matlab ", ""));
-}
+function pushToDownload(payload, filename) {
+  var element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(payload));
+  element.setAttribute('download', filename);
 
-function edit_mwcoreProperties(data, version) {
-  xml = $(data);
-  xml.find("matlabRelease").text(version.replace("Matlab ", ""));
-}
+  element.style.display = 'none';
+  document.body.appendChild(element);
 
-function edit_mwcorePropertiesExtension(data, version) {
-  xml = $(data);
-  xml.find("matlabVersion").text(MATLAB_VERSION[version]);
+  element.click();
+
+  document.body.removeChild(element);
 }
