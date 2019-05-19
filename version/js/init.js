@@ -42,7 +42,7 @@ var choice = "Matlab R2018b";
 
     $("#fileinput").on('change', function(event) {
       // Loading
-      $('#progressbar').css('visibility', 'visible');
+      $('#progressbar').show();
       //Reading file
       readSingleFile(event);
     });
@@ -85,58 +85,106 @@ class MDL {
 }
 
 class SLX {
-  constructor(name, buffer, target) {
-    this.name = name;
-    this.buffer = buffer;
+  constructor(file, zip, target) {
+    this.name = file.name;
+    this.zip = zip;
     this.target = target;
+    this.fileStreams = ["metadata/coreProperties.xml", "metadata/mwcoreProperties.xml", "metadata/mwcorePropertiesExtension.xml"]
+    this.changeVersion();
+  }
+
+  changeVersion() {
+    this.zip.forEach((relativePath, zipEntry) => {
+      for (var i in this.fileStreams) {
+        var path = this.fileStreams[i];
+        if (path.localeCompare(relativePath) == 0) {
+          var callname = "this.edit_" + ((relativePath.split("/")[1]).split("."))[0];
+          // wow! an eval ?
+          this.zip.file(relativePath).async("string").then((data) => {
+            var returnedData = eval(callname + "(data, this.target)");
+            console.log(returnedData);
+            //TODO: this is not working
+            this.zip.file(relativePath, returnedData);
+          });
+        }
+      }
+    });
+    //TODO: uncomment this
+    /*
+    this.zip.generateAsync({type:"base64"}).then((base64) => {
+      pushToDownload(base64, new String("[" + choice.split(' ')[1] + "]" + this.name), 'data:application/zip;base64,');
+    });
+    */
   }
 
   edit_coreProperties(data, version) {
-    xml = $(data);
-    xml.find("cp:version").text(version.replace("Matlab ", ""));
+    var xml = this.xmlParser(data);
+    xml.getElementsByTagName("cp:version")[0].childNodes[0].nodeValue = version.split(" ")[1];
+    return new XMLSerializer().serializeToString(xml.documentElement);
   }
 
   edit_mwcoreProperties(data, version) {
-    xml = $(data);
-    xml.find("matlabRelease").text(version.replace("Matlab ", ""));
+    var xml = this.xmlParser(data);
+    xml.getElementsByTagName("matlabRelease")[0].childNodes[0].nodeValue = version.split(" ")[1];
+    return new XMLSerializer().serializeToString(xml.documentElement);
   }
 
   edit_mwcorePropertiesExtension(data, version) {
-    xml = $(data);
-    xml.find("matlabVersion").text(MATLAB_VERSION[version]);
+    var xml = this.xmlParser(data);
+    xml.getElementsByTagName("matlabVersion")[0].childNodes[0].nodeValue = MATLAB_VERSION[version];
+    return new XMLSerializer().serializeToString(xml.documentElement);
   }
 
+  xmlParser(data) {
+    if (window.DOMParser) {
+      var parser = new DOMParser();
+      var xmlDoc = parser.parseFromString(data, "text/xml");
+    } else {
+      var xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+      xmlDoc.async = false;
+      xmlDoc.loadXML(data);
+    }
+    return xmlDoc;
+  }
 }
 
 
 function readSingleFile(e) {
   var file = e.target.files[0];
-  console.log(file);
+  
   if (!file) {
     return;
   }
+
   var ext = file.name.split('.'); ext = ext[ext.length - 1];
+  
   var reader = new FileReader();
   reader.onload = function(e) {
     var contents = e.target.result;
-    console.log(e.target.result);
+  
     if (ext == "mdl" && contents != "") {
       var mdl = new MDL(file, contents, MATLAB_VERSION[choice]);
-      pushToDownload(mdl.getBuffer(), new String("[" + choice.split(' ')[1] + "]" + file.name));
-      $('#progressbar').css('visibility', 'hidden');
-    } else if (ext == "slx" && contents != "") {
-      var slx = new SLX(file, contents, MATLAB_VERSION[choice]);
+      pushToDownload(mdl.getBuffer(), new String("[" + choice.split(' ')[1] + "]" + file.name, 'data:text/plain;charset=utf-8,'));
+      $('#progressbar').hide();
+    } else if (ext == "slx" && contents !== null) {
+      JSZip.loadAsync(contents).then(function(zip) {
+        new SLX(file, zip, choice);
+      });
     } else {
       M.toast({html: 'Serioulsy ? An ' + ext + ' file ?'});
     }
   };
-  reader.readAsText(file);
+  if (ext == 'slx') {
+    reader.readAsArrayBuffer(file);
+  } else if (ext == 'mdl') {
+    reader.readAsText(file);
+  }
 }
 
 
-function pushToDownload(payload, filename) {
+function pushToDownload(payload, filename, type) {
   var element = document.createElement('a');
-  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(payload));
+  element.setAttribute('href', type + encodeURIComponent(payload));
   element.setAttribute('download', filename);
 
   element.style.display = 'none';

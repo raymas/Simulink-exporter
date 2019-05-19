@@ -6,7 +6,7 @@ Handles :
 - [X] MDL files
 - [ ] SLX files
 
-Just connect to [github.io](https://raymas.gitub.io/Simulink-exporter) to start!
+Just connect to [github.io](https://raymas.github.io/Simulink-exporter) to start!
 
 ## Principle
 Simulink is using two file type as container of created models.
